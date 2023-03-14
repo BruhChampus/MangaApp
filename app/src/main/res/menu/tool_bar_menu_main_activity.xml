@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+
+    <item android:id="@+id/mi_dark_mode"
+        android:title="dark mode"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_dark_mode"
+        />
+
+    <item android:id="@+id/mi_add_manga"
+        android:title="add manga"
+        android:icon="@drawable/ic_add_manga"
+        app:showAsAction="ifRoom" />
+</menu>

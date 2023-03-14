@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginTop="12dp">
+
+
+    <TextView
+        android:id="@+id/tv_commentary_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:paddingStart="12dp"
+        android:text="23,123,2322"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tv_commentary" />
+
+    <TextView
+        android:id="@+id/tv_commentary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:padding="12dp"
+        tools:text="sddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintTop_toBottomOf="@id/tv_commentary_date"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/et_edit_comment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:padding="12dp"
+        android:background="@drawable/commentaries_border"
+        android:textSize="14sp"
+        android:textColor="@color/black"
+        android:inputType="textMultiLine"
+        android:overScrollMode="always"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/tv_commentary_date"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/tv_commentary"
+        />
+
+    <ImageView
+        android:id="@+id/iv_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:contentDescription="image"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="center"
+        android:src="@drawable/ic_edit"
+        android:visibility="visible"
+        app:layout_constraintEnd_toStartOf="@id/iv_delete"
+        app:layout_constraintBottom_toTopOf="@id/tv_commentary" />
+
+
+
+    <ImageView
+        android:id="@+id/iv_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:contentDescription="image"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="center"
+        android:src="@drawable/ic_delete"
+        android:layout_marginEnd="12dp"
+        android:padding="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tv_commentary" />
+
+
+    <ImageView
+        android:id="@+id/iv_save"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:contentDescription="image"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="center"
+        android:src="@drawable/ic_save"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@id/iv_cancel"
+        app:layout_constraintBottom_toTopOf="@id/tv_commentary" />
+
+    <ImageView
+        android:id="@+id/iv_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_marginEnd="12dp"
+        android:padding="12dp"
+        android:contentDescription="image"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:scaleType="center"
+        android:src="@drawable/ic_cancel"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tv_commentary" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

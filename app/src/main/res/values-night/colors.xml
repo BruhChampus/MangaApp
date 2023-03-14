@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <color name="black">#C1C1C1</color>
+    <color name="white">#212759</color>
+    <color name="gray">#A1A1A1</color>
+    <color name="light_gray">#BCBCBC</color>
+    <color name="white_card_cell_text">#FFFFFFFF</color>
+    <color name="orange">#E48F13</color>
+    <color name="orange_dark">#AC6B0D</color>
+</resources>
