@@ -8,8 +8,8 @@ import com.example.myapplication.R
 @Entity(tableName = "comics-table")
 data class Comics(
     @PrimaryKey(autoGenerate = true)
-    val id:Int,
-    val type:String,
+    val id:Int = 0,
+    val type:String = "Manga",
     val title:String,
     val cover:Int = R.drawable.cover_default,
     val backgroundCover:Int = R.drawable.cover_default,

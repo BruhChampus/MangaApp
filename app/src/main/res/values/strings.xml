@@ -4,4 +4,24 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="open_nav_bar">Open</string>
     <string name="close_nav_bar">Close</string>
+    <string-array name="comics_statuses">
+        <item>Ongoing</item>
+        <item>Frozen</item>
+        <item>Finished</item>
+    </string-array>
+
+    <string-array name="translation_statuses">
+        <item>Continues</item>
+        <item>Dropped</item>
+        <item>Finished</item>
+    </string-array>
+
+    <string-array name="comics_types">
+        <item>Manga</item>
+        <item>Manhwa</item>
+        <item>Manhua</item>
+        <item>Book</item>
+        <item>Comics</item>
+    </string-array>
+
 </resources>

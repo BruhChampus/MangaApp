@@ -54,20 +54,9 @@
             android:text="Chapters uploaded"
             android:textColor="@color/gray"
             android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_release_format_label"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_author_label" />
-
-        <TextView
-            android:id="@+id/tv_release_format_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Release format"
-            android:textColor="@color/gray"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_publisher_label"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_chapters_uploaded_label" />
 
         <TextView
             android:id="@+id/tv_author_label"
@@ -80,24 +69,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_translation_status_label" />
 
-        <TextView
-            android:id="@+id/tv_publisher_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Publisher"
-            android:textColor="@color/gray"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_release_format_label"
-            />
-
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrier1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="end"
-            app:constraint_referenced_ids="tv_comics_status_label,tv_translation_status_label,tv_author_label,tv_chapters_uploaded_label,tv_release_format_label,tv_publisher_label"
+            app:constraint_referenced_ids="tv_comics_status_label,tv_translation_status_label,tv_author_label,tv_chapters_uploaded_label"
 
             />
 
@@ -122,7 +99,7 @@
             android:textColor="@color/black"
             android:textSize="16sp"
             android:paddingStart="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_chapters_uploaded"
+            app:layout_constraintBottom_toTopOf="@+id/tv_author"
             app:layout_constraintStart_toEndOf="@id/barrier1"
             app:layout_constraintTop_toBottomOf="@+id/tv_comics_status" />
 
@@ -134,21 +111,9 @@
             android:textColor="@color/black"
             android:textSize="16sp"
             android:paddingStart="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_release_format"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/barrier1"
-            app:layout_constraintTop_toBottomOf="@+id/tv_translation_status" />
-
-        <TextView
-            android:id="@+id/tv_release_format"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="In color    Web"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:paddingStart="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_author"
-            app:layout_constraintStart_toEndOf="@id/barrier1"
-            app:layout_constraintTop_toBottomOf="@+id/tv_chapters_uploaded" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_author" />
 
 
         <TextView
@@ -159,21 +124,11 @@
             android:textColor="@color/black"
             android:textSize="16sp"
             android:paddingStart="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_publisher"
+            app:layout_constraintBottom_toTopOf="@+id/tv_chapters_uploaded"
             app:layout_constraintStart_toEndOf="@id/barrier1"
-            app:layout_constraintTop_toBottomOf="@+id/tv_release_format" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_translation_status" />
 
-        <TextView
-            android:id="@+id/tv_publisher"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Naver"
-            android:textColor="@color/black"
-            android:textSize="16sp"
-            android:paddingStart="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/barrier1"
-            app:layout_constraintTop_toBottomOf="@+id/tv_author" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
     </HorizontalScrollView>
 

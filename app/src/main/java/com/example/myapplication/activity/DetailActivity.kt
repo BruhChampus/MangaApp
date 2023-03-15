@@ -1,6 +1,7 @@
 package com.example.myapplication.activity
 
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -63,6 +64,7 @@ class DetailActivity : AppCompatActivity(), NightModeSetUp {
     }
 
 
+
     //Method for back arrow. When pressed - return back on our stack
     override fun onSupportNavigateUp(): Boolean {
         onBackPressedDispatcher.onBackPressed()
@@ -103,6 +105,8 @@ class DetailActivity : AppCompatActivity(), NightModeSetUp {
             ).show()
         }
     }
+
+
 
 
     //Getting comics by id

@@ -45,7 +45,6 @@ class CommentariesFragment : Fragment() {
 
     }
 
-    //TODO fix corners on cardView bottom right and left make them sharp edged
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,7 +62,7 @@ class CommentariesFragment : Fragment() {
         lifecycleScope.launch {
             commentaryDao.fetchAllCommentaries(comicsList[comicsId].id).collect() {
                 val list = kotlin.collections.ArrayList(it)
-                setupListOfCommenariesIntoRecyclerView(list, commentaryDao)
+                setupListOfCommentariesIntoRecyclerView(list, commentaryDao)
             }
         }
 
@@ -109,7 +108,7 @@ class CommentariesFragment : Fragment() {
     }
 
 
-    private fun setupListOfCommenariesIntoRecyclerView(
+    private fun setupListOfCommentariesIntoRecyclerView(
         commentaryList: ArrayList<CommentaryEntity>,
         commentaryDao: CommentaryDao
     ) {
@@ -128,6 +127,9 @@ class CommentariesFragment : Fragment() {
             binding.rvComments.adapter = commentaryAdapter
             binding.rvComments.visibility = View.VISIBLE
         }
+        else{
+            binding.rvComments.visibility = View.GONE
+        }
 
     }
 
@@ -139,7 +141,9 @@ class CommentariesFragment : Fragment() {
 
         lifecycleScope.launch {
             commentaryDao.fetchCommentaryById(comicsList[comicsId].id, id).collect {
+                if(it != null){
                 binding.etEditComment.setText(it.commentary)
+            }
             }
         }
 
@@ -190,7 +194,6 @@ class CommentariesFragment : Fragment() {
         val alertDialog: AlertDialog = builder.create()
         alertDialog.setCancelable(false)
         alertDialog.show()
-
     }
 
 

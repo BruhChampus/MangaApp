@@ -7,8 +7,7 @@ object Constants {
 
 
     const val COMICS_ID = "comics_id"
-    const val NIGHT_MODE = "night_mode"
-    const val SHARED_PREFS = "shared_prefs"
+
 
 
     fun getComics(): ArrayList<Comics> {

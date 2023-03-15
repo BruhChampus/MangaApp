@@ -7,7 +7,7 @@ import com.example.myapplication.ComicsClickListener
 import com.example.myapplication.databinding.CardCellBinding
 import com.example.myapplication.model.Comics
 
-//CardAdapter for our comicses
+//CardAdapter for our comics
 class CardAdapter(private val comicsList: List<Comics>, private val clickListener: ComicsClickListener)
     : RecyclerView.Adapter<CardAdapter.CardViewHolder>()
 {
