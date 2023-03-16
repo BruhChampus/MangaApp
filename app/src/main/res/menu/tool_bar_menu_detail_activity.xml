@@ -6,4 +6,7 @@
         android:icon="@drawable/ic_dark_mode"
         app:showAsAction="ifRoom" />
 
+    <item android:id="@+id/mi_delete"
+        android:title="Delete"
+        app:showAsAction="never" />
 </menu>

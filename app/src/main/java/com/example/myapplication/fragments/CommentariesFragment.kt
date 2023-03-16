@@ -21,6 +21,7 @@ import com.example.myapplication.data.dao.CommentaryDao
 import com.example.myapplication.data.db.MangaDatabase
 import com.example.myapplication.databinding.DialogEditBinding
 import com.example.myapplication.databinding.FragmentCommentariesBinding
+import com.example.myapplication.model.Comics
 import com.example.myapplication.model.CommentaryEntity
 import com.example.myapplication.recyclerviews.CommentaryAdapter
 import kotlinx.coroutines.launch
@@ -29,13 +30,14 @@ import java.util.*
 
 
 private val COMICS_ID = Constants.COMICS_ID
-private val comicsList = Constants.getComics()
+//private val comicsList = Constants.getComics()
 
 
 class CommentariesFragment : Fragment() {
 
     private var comicsId: Int = 0
     private lateinit var binding: FragmentCommentariesBinding
+    lateinit var comics: Comics
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,17 +52,29 @@ class CommentariesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         binding = FragmentCommentariesBinding.inflate(layoutInflater)
+
         val commentaryDao = MangaDatabase.getInstance(this.requireContext()).CommentaryDao()
+        val comicsDao = MangaDatabase.getInstance(requireContext()).ComicsDao()
 
-
-
-        binding.btnSubmitComment.setOnClickListener {
-            addCommentary(commentaryDao, comicsList[comicsId].id)
+        //Fetching comics from DataBase by Id that we received from MainActivity
+        lifecycleScope.launch {
+            comicsDao.fetchComicsById(comicsId).collect() {
+                if (it != null) {
+                    comics = it
+                }
+            }
         }
 
+        binding.btnSubmitComment.setOnClickListener {
+            addCommentary(commentaryDao, comicsId)
+        }
+
+
+        //Fetching all commentaries nder this title
         lifecycleScope.launch {
-            commentaryDao.fetchAllCommentaries(comicsList[comicsId].id).collect() {
+            commentaryDao.fetchAllCommentaries(comicsId).collect() {
                 val list = kotlin.collections.ArrayList(it)
                 setupListOfCommentariesIntoRecyclerView(list, commentaryDao)
             }
@@ -72,7 +86,7 @@ class CommentariesFragment : Fragment() {
     private fun hideKeyboard() {
         val imm =
             requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view?.windowToken,0)
+        imm.hideSoftInputFromWindow(view?.windowToken, 0)
     }
 
 
@@ -84,6 +98,8 @@ class CommentariesFragment : Fragment() {
         return date
     }
 
+
+    //Inserting commentary in DataBase
     private fun addCommentary(commentaryDao: CommentaryDao, comicsId: Int) {
         val commentary = binding.etComment.text.toString()
 
@@ -108,6 +124,7 @@ class CommentariesFragment : Fragment() {
     }
 
 
+    //Setting up how recycler view display commentaries
     private fun setupListOfCommentariesIntoRecyclerView(
         commentaryList: ArrayList<CommentaryEntity>,
         commentaryDao: CommentaryDao
@@ -126,13 +143,18 @@ class CommentariesFragment : Fragment() {
             binding.rvComments.layoutManager = LinearLayoutManager(activity)
             binding.rvComments.adapter = commentaryAdapter
             binding.rvComments.visibility = View.VISIBLE
-        }
-        else{
+        } else {
             binding.rvComments.visibility = View.GONE
         }
 
     }
 
+
+    //Updating commentary in DataBase
+    /**
+     * Getting commentary by it's id. Creating dialog in which we will edit our commentary. Binding edit text field in dialog
+     * Prescribing what will happen when you click on the buttons
+     */
     private fun updateRecordDialog(id: Int, commentaryDao: CommentaryDao) {
 
         val updateDialog = Dialog(requireContext(), R.style.ThemeOverlay_AppCompat_Dialog_Alert)
@@ -140,10 +162,10 @@ class CommentariesFragment : Fragment() {
         updateDialog.setContentView(binding.root)
 
         lifecycleScope.launch {
-            commentaryDao.fetchCommentaryById(comicsList[comicsId].id, id).collect {
-                if(it != null){
-                binding.etEditComment.setText(it.commentary)
-            }
+            commentaryDao.fetchCommentaryById(comics.id, id).collect {
+                if (it != null) {
+                    binding.etEditComment.setText(it.commentary)
+                }
             }
         }
 
@@ -154,7 +176,7 @@ class CommentariesFragment : Fragment() {
                     commentaryDao.update(
                         CommentaryEntity(
                             commentaryId = id,
-                            titleIdInWhich = comicsList[comicsId].id,
+                            titleIdInWhich = comics.id,
                             commentary = commentary,
                             date = getCommentaryDate() + " (Edited)"
                         )
@@ -176,13 +198,16 @@ class CommentariesFragment : Fragment() {
     }
 
 
+
+    //Deleting commentary from DataBase
     private fun deleteRecordAlertDialog(id: Int, commentaryDao: CommentaryDao) {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Delete Record")
         builder.setPositiveButton("Yes") { dialogInterface, _ ->
             lifecycleScope.launch {
                 commentaryDao.delete(CommentaryEntity(id))
-                Toast.makeText(requireContext(), "Comment successfully deleted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Comment successfully deleted", Toast.LENGTH_SHORT)
+                    .show()
             }
             dialogInterface.dismiss()
         }
@@ -198,7 +223,6 @@ class CommentariesFragment : Fragment() {
 
 
     companion object {
-
         @JvmStatic
         fun newInstance(comicsId: Int) =
             CommentariesFragment().apply {

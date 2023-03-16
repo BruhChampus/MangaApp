@@ -38,21 +38,31 @@ class AddManga : AppCompatActivity(), NightModeSetUp {
         binding = ActivityAddMangaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+
+        //Setting back arrow for toolbar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
 
+        //Getting instance of MangaDatabase and calling its abstract function that returns us comicsDao
         val comicsDao = MangaDatabase.getInstance(this).ComicsDao()
+
+
         binding.ibAddCoverImage.setOnClickListener {
             requestStoragePermission()
         }
-
         binding.btnSave.setOnClickListener {
-            saveComics(comicsDao, 1)
+            saveComics(comicsDao)
         }
+        binding.btnCancel.setOnClickListener {
+            clearFields()
+        }
+
+
     }
 
 
+    //What happens after we receive the data from implicit intent(in our case it's gallery). We're getting data and setting background img by URI
     val openGalleryLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK && result.data != null) {
@@ -61,6 +71,8 @@ class AddManga : AppCompatActivity(), NightModeSetUp {
             }
         }
 
+
+    //Go through every permissions if each permission is allowed then creating implicit intent
     val requestPermission: ActivityResultLauncher<Array<String>> =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             permissions.entries.forEach {
@@ -81,6 +93,8 @@ class AddManga : AppCompatActivity(), NightModeSetUp {
             }
         }
 
+
+//Show alert dialog and launch permissions request
     private fun requestStoragePermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(
                 this,
@@ -102,32 +116,45 @@ class AddManga : AppCompatActivity(), NightModeSetUp {
         }
     }
 
-    private fun saveComics(comicsDao: ComicsDao, comicsId: Int) {
+
+    //Method that is responsible for inserting data in DataBase
+    private fun saveComics(comicsDao: ComicsDao) {
         val comicsType = binding.spComicsTypeEdit.selectedItem.toString()
         val comicsTitle = binding.etMangaTitleEdit.text.toString()
         val comicsCover = binding.ibAddCoverImage
         val comicsBackgroundCover = binding.ibAddBackgroundCoverImage
         val comicsDescription = binding.etTitleDescriptionEdit.text
 
-        if (comicsTitle != null) {
-            if (comicsTitle.isNotEmpty()) {
-                lifecycleScope.launch {
-                    comicsDao.insert(
-                        Comics(
-                            type = comicsType,
-                            title = comicsTitle,
-                            description = comicsDescription.toString()
-                        )
+        if (comicsTitle.isNotEmpty()) {
+            lifecycleScope.launch {
+                comicsDao.insert(
+                    Comics(
+                        type = comicsType,
+                        title = comicsTitle,
+                        description = comicsDescription.toString()
                     )
-
-                }
-            } else {
-                Toast.makeText(this, "Comics title cannot be blank", Toast.LENGTH_SHORT)
+                )
+                Toast.makeText(this@AddManga, "Comics successfully created", Toast.LENGTH_SHORT)
                     .show()
+                onBackPressedDispatcher.onBackPressed()
+
             }
+        } else {
+            Toast.makeText(this, "Comics title cannot be blank", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
+    //Method that clears fields in AddManga activity
+    private fun clearFields(){
+        binding.etMangaTitleEdit.text?.clear()
+//        binding.spComicsTypeEdit.selectedItem.toString()
+//        binding.ibAddCoverImage
+//       binding.ibAddBackgroundCoverImage
+        binding.etTitleDescriptionEdit.text?.clear()
+        binding.etAuthorEdit.text?.clear()
+        binding.etChapterUploaded.text?.clear()
+    }
 
 
     //Method for back arrow. When pressed - return back on our stack

@@ -1,24 +1,31 @@
 package com.example.myapplication.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.data.Constants
+import com.example.myapplication.data.db.MangaDatabase
 import com.example.myapplication.databinding.FragmentInformationBinding
+import kotlinx.coroutines.launch
 
 
 private const val COMICS_ID = Constants.COMICS_ID
-private val comicsList = Constants.getComics()
+//private val comicsList = Constants.getComics()
 
 
-//Describes infromation fragment
+
 
 class InformationFragment : Fragment() {
 
     private var comicsId: Int = 0
     private lateinit var binding: FragmentInformationBinding
+
+
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,22 +45,31 @@ class InformationFragment : Fragment() {
         val description = binding.tvComicsDescription
         val tvShow = binding.tvShow
         val tvHide = binding.tvHide
+        val comicsDao = MangaDatabase.getInstance(requireContext()).ComicsDao()
 
-       description.text =  bindFragmentDetails(comicsId)
 
-        //Checking if comics description length > 8 words and if so, showing button "Show" and setting onClick listeners
-        if (comicsList[comicsId].description.length > 8) {
-            tvShow.visibility = View.VISIBLE
-            tvShow.setOnClickListener { showOnClick(tvShow, tvHide) }
-            tvHide.setOnClickListener { hideOnClick(tvShow, tvHide) }
+        //Fetching comics by id and binding it's description
+        lifecycleScope.launch {
+            comicsDao.fetchComicsById(comicsId).collect() {
+                if(it != null) {
+                    description.text = it.description
+
+                    //Checking if comics description length > 6 words and if so, showing button "Show" and setting onClick listeners
+                    if (description.text.length > 6) {
+                        tvShow.visibility = View.VISIBLE
+                        tvShow.setOnClickListener { showOnClick(tvShow, tvHide) }
+                        tvHide.setOnClickListener { hideOnClick(tvShow, tvHide) }
+                    }
+                }
+            }
         }
+
+
         return binding.root
     }
 
 
-
-
-    //Methods for button "Show"
+    //Method for button "Show"
     private fun showOnClick(show: View, hide: View) {
         show.setOnClickListener {
             binding.tvComicsDescription.maxLines = 100
@@ -73,10 +89,7 @@ class InformationFragment : Fragment() {
     }
 
 
-    //Getting comics description via it's id in comicsList
-    private fun bindFragmentDetails(comicsId: Int): String {
-        return comicsList[comicsId].description
-    }
+
 
 
     companion object {

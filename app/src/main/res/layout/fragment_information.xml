@@ -157,7 +157,7 @@
         android:textSize="16sp"
         android:textColor="@color/orange"
         android:paddingBottom="6dp"
-        tools:visibility="visible"
+        tools:visibility="invisible"
         />
 
     <TextView

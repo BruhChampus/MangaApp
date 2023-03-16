@@ -8,7 +8,7 @@ import com.example.myapplication.databinding.CardCellBinding
 import com.example.myapplication.model.Comics
 
 //CardAdapter for our comics
-class CardAdapter(private val comicsList: List<Comics>, private val clickListener: ComicsClickListener)
+class CardAdapter(private val comicsList: ArrayList<Comics>, private val clickListener: ComicsClickListener)
     : RecyclerView.Adapter<CardAdapter.CardViewHolder>()
 {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardViewHolder {

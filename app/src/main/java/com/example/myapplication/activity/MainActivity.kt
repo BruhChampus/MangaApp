@@ -1,22 +1,15 @@
 package com.example.myapplication.activity
 
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.app.AppCompatDelegate.NightMode
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.ComicsClickListener
@@ -24,30 +17,34 @@ import com.example.myapplication.NightModeSetUp
 import com.example.myapplication.R
 import com.example.myapplication.data.Constants
 import com.example.myapplication.data.dao.ComicsDao
-import com.example.myapplication.data.dao.CommentaryDao
+import com.example.myapplication.data.db.MangaDatabase
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.model.Comics
-import com.example.myapplication.model.CommentaryEntity
 import com.example.myapplication.recyclerviews.CardAdapter
-import com.example.myapplication.recyclerviews.CommentaryAdapter
-import java.util.ArrayList
+import kotlinx.coroutines.launch
+import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(), ComicsClickListener, NightModeSetUp {
 
     lateinit var binding: ActivityMainBinding
     lateinit var toggle: ActionBarDrawerToggle
-    var nightMode = AppCompatDelegate.getDefaultNightMode()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //Setting how our recycler view will display our comicses cells
-        binding.rvComicsList.apply {
-            layoutManager = GridLayoutManager(applicationContext, 2)
-            adapter = CardAdapter(Constants.getComics(), this@MainActivity)
+        //Setting how our recycler view will display our comics cells
+        val comicsDao = MangaDatabase.getInstance(this).ComicsDao()
 
+        binding.rvComicsList.apply {
+            lifecycleScope.launch {
+                comicsDao.fetchAllComics().collect() {
+                    val list = ArrayList(it)
+                    setupListOfComicsIntoRecyclerView(list, comicsDao)
+                }
+            }
         }
         toggle = ActionBarDrawerToggle(
             this,
@@ -61,16 +58,19 @@ class MainActivity : AppCompatActivity(), ComicsClickListener, NightModeSetUp {
         //telling toggle that it ready to be used
         toggle.syncState()
 
-        //setDisplayHomeAsUpEnabled - transforms our burger icon into backArrow cliking on which we can close our slideable menu
+        //setDisplayHomeAsUpEnabled - transforms our burger icon into backArrow clicking on which we can close our slideable menu
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
 
         binding.nvNavView.setNavigationItemSelectedListener {
             onOptionsItemSelected(it)
         }
 
-
     }
 
+
+
+    //Method that setups how elements will be displayed in RecyclerView
     private fun setupListOfComicsIntoRecyclerView(
         comicsList: ArrayList<Comics>,
         comicsDao: ComicsDao
@@ -78,7 +78,9 @@ class MainActivity : AppCompatActivity(), ComicsClickListener, NightModeSetUp {
         if (comicsList.isNotEmpty()) {
             val comicsAdapter = CardAdapter(
                 comicsList,this)
-            comicsList.reverse()
+            binding.rvComicsList.layoutManager = GridLayoutManager(applicationContext, 2)
+            binding.rvComicsList.adapter = comicsAdapter
+            binding.rvComicsList.visibility = View.VISIBLE
         }
         else{
             binding.rvComicsList.visibility = View.GONE
@@ -95,6 +97,7 @@ class MainActivity : AppCompatActivity(), ComicsClickListener, NightModeSetUp {
     }
 
 
+    //Describing what happens when we touch icon
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         //if our burger button tapped return true
         if (toggle.onOptionsItemSelected(item)) {
@@ -149,7 +152,8 @@ class MainActivity : AppCompatActivity(), ComicsClickListener, NightModeSetUp {
     }
 
 
-    //Function needed to tell us what will happen if we click on comics card
+    //Describes what will happen if we click on comics card.
+    //There we just open Activity Detail and passing id of card which we clicked, further this id will help us get info from DataBase for specific comics
     override fun onClick(comics: Comics) {
         val intent = Intent(applicationContext, DetailActivity::class.java)
         intent.putExtra(Constants.COMICS_ID, comics.id)

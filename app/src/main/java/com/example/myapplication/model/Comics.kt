@@ -10,7 +10,7 @@ data class Comics(
     @PrimaryKey(autoGenerate = true)
     val id:Int = 0,
     val type:String = "Manga",
-    val title:String,
+    val title:String = "??",
     val cover:Int = R.drawable.cover_default,
     val backgroundCover:Int = R.drawable.cover_default,
     val description:String = "No description yet"
