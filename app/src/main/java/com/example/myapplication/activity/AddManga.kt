@@ -1,11 +1,20 @@
 package com.example.myapplication.activity
 
+import android.Manifest
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
+import android.graphics.Bitmap
 import android.media.Image
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.provider.MediaStore
+import android.provider.Settings
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -29,10 +38,23 @@ import com.example.myapplication.data.db.MangaDatabase
 import com.example.myapplication.databinding.ActivityAddMangaBinding
 import com.example.myapplication.model.Comics
 import com.example.myapplication.model.CommentaryEntity
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
+import java.util.*
 
 class AddManga : AppCompatActivity(), NightModeSetUp {
     private lateinit var binding: ActivityAddMangaBinding
+    private var saveCoverImageToInternalStorage: Uri? = null
+    private var saveBackgroundCoverImageToInternalStorage: Uri? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddMangaBinding.inflate(layoutInflater)
@@ -49,7 +71,10 @@ class AddManga : AppCompatActivity(), NightModeSetUp {
 
 
         binding.ibAddCoverImage.setOnClickListener {
-            requestStoragePermission()
+            chooseCoverPhotoFromGallery()
+        }
+        binding.ibAddBackgroundCoverImage.setOnClickListener {
+            chooseBackgroundCoverPhotoFromGallery()
         }
         binding.btnSave.setOnClickListener {
             saveComics(comicsDao)
@@ -62,67 +87,17 @@ class AddManga : AppCompatActivity(), NightModeSetUp {
     }
 
 
-    //What happens after we receive the data from implicit intent(in our case it's gallery). We're getting data and setting background img by URI
-    val openGalleryLauncher: ActivityResultLauncher<Intent> =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK && result.data != null) {
-                val imageBackground: ImageView = binding.ibAddCoverImage
-                imageBackground.setImageURI(result.data?.data)
-            }
-        }
 
 
-    //Go through every permissions if each permission is allowed then creating implicit intent
-    val requestPermission: ActivityResultLauncher<Array<String>> =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            permissions.entries.forEach {
-                val permissionName = it.key
-                val isGranted = it.value
-                if (isGranted) {
-                    val pickIntent =
-                        Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                    openGalleryLauncher.launch(pickIntent)
-
-
-                } else {
-                    if (permissionName == android.Manifest.permission.READ_EXTERNAL_STORAGE) {
-                        Toast.makeText(this, "You've denied the permission", Toast.LENGTH_LONG)
-                            .show()
-                    }
-                }
-            }
-        }
-
-
-//Show alert dialog and launch permissions request
-    private fun requestStoragePermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                this,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
-            )
-        ) {
-            val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-            builder.setTitle("Manga App").setMessage("Manga App needs access to your storage")
-                .setPositiveButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            builder.create().show()
-        } else {
-            requestPermission.launch(
-                arrayOf(
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                )
-            )
-
-        }
-    }
 
 
     //Method that is responsible for inserting data in DataBase
     private fun saveComics(comicsDao: ComicsDao) {
         val comicsType = binding.spComicsTypeEdit.selectedItem.toString()
         val comicsTitle = binding.etMangaTitleEdit.text.toString()
-        val comicsCover = binding.ibAddCoverImage
-        val comicsBackgroundCover = binding.ibAddBackgroundCoverImage
+        val comicsCover: String = saveCoverImageToInternalStorage.toString()
+         val comicsBackgroundCover: String = saveBackgroundCoverImageToInternalStorage.toString()
+
         val comicsDescription = binding.etTitleDescriptionEdit.text
 
         if (comicsTitle.isNotEmpty()) {
@@ -131,7 +106,9 @@ class AddManga : AppCompatActivity(), NightModeSetUp {
                     Comics(
                         type = comicsType,
                         title = comicsTitle,
-                        description = comicsDescription.toString()
+                        description = comicsDescription.toString(),
+                        cover = comicsCover,
+                        backgroundCover = comicsBackgroundCover
                     )
                 )
                 Toast.makeText(this@AddManga, "Comics successfully created", Toast.LENGTH_SHORT)
@@ -148,12 +125,11 @@ class AddManga : AppCompatActivity(), NightModeSetUp {
     //Method that clears fields in AddManga activity
     private fun clearFields(){
         binding.etMangaTitleEdit.text?.clear()
-//        binding.spComicsTypeEdit.selectedItem.toString()
-//        binding.ibAddCoverImage
-//       binding.ibAddBackgroundCoverImage
         binding.etTitleDescriptionEdit.text?.clear()
         binding.etAuthorEdit.text?.clear()
         binding.etChapterUploaded.text?.clear()
+        binding.ibAddCoverImage.setImageResource(R.drawable.cover_default)
+        binding.ibAddBackgroundCoverImage.setImageResource(R.drawable.cover_default)
     }
 
 
@@ -195,4 +171,143 @@ class AddManga : AppCompatActivity(), NightModeSetUp {
             ).show()
         }
     }
+
+
+    private val openGalleryForCover =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val contentURI = result.data!!.data
+                try {
+                    val selectedImageBitmap = MediaStore.Images.Media.getBitmap(
+                       this.contentResolver,
+                        contentURI
+                    )
+                    saveCoverImageToInternalStorage = saveImageToInternalStorage(selectedImageBitmap)
+                    Log.e("Saved image:", "Path: $saveCoverImageToInternalStorage")
+                    binding.ibAddCoverImage.setImageBitmap(selectedImageBitmap)
+                } catch (e: IOException) {
+                    e.stackTrace
+                    Toast.makeText(
+                        this,
+                        "Failed to load image from gallery!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
+    private fun chooseCoverPhotoFromGallery() {
+
+        Dexter.withContext(this).withPermissions(
+            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ).withListener(object : MultiplePermissionsListener {
+            override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                if (report!!.areAllPermissionsGranted()) {
+                    val galleryIntent =
+                        Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    openGalleryForCover.launch(galleryIntent)
+                }
+            }
+
+            override fun onPermissionRationaleShouldBeShown(
+                permissions: MutableList<PermissionRequest?>?,
+                token: PermissionToken?
+            ) {
+                showRationalDialogForPermissions()
+            }
+        }).onSameThread().check()
+    }
+
+
+    private val openGalleryForBackgroundCover =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+                val contentURI = result.data!!.data
+                try {
+                    val selectedImageBitmap = MediaStore.Images.Media.getBitmap(
+                        this.contentResolver,
+                        contentURI
+                    )
+                    saveBackgroundCoverImageToInternalStorage = saveImageToInternalStorage(selectedImageBitmap)
+                    Log.e("Saved image:", "Path: $saveBackgroundCoverImageToInternalStorage")
+                    binding.ibAddBackgroundCoverImage.setImageBitmap(selectedImageBitmap)
+                } catch (e: IOException) {
+                    e.stackTrace
+                    Toast.makeText(
+                        this,
+                        "Failed to load image from gallery!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
+    private fun chooseBackgroundCoverPhotoFromGallery() {
+
+        Dexter.withContext(this).withPermissions(
+            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ).withListener(object : MultiplePermissionsListener {
+
+            override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                 if (report!!.areAllPermissionsGranted()) {
+                     val galleryIntent =
+                        Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                    openGalleryForBackgroundCover.launch(galleryIntent)
+                }
+            }
+
+            override fun onPermissionRationaleShouldBeShown(
+                permissions: MutableList<PermissionRequest?>?,
+                token: PermissionToken?
+            ) {
+                showRationalDialogForPermissions()
+            }
+        }).onSameThread().check()
+    }
+
+
+
+
+    private fun showRationalDialogForPermissions() {
+
+        android.app.AlertDialog.Builder(this).setMessage(
+            "It looks like you've turned off permissions required for this feature. " +
+                    "It can be enabled under the application settings"
+        ).setPositiveButton("GO TO SETTINGS")
+        { _, _ ->
+            try {
+                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                val uri = Uri.fromParts("package", packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                e.printStackTrace()
+            }
+        }.setNegativeButton("CANCEL") { dialog, _ ->
+            dialog.dismiss()
+        }.show()
+    }
+
+    private fun saveImageToInternalStorage(bitmap: Bitmap): Uri {
+        val wrapper = ContextWrapper(applicationContext)
+        var file = wrapper.getDir(IMAGE_DIRECTORY, Context.MODE_PRIVATE)
+        file = File(file, "${UUID.randomUUID()}.jpg")
+
+        try {
+            val stream: OutputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+            stream.flush()
+            stream.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return Uri.parse(file.absolutePath)
+    }
+
+    companion object{
+        private const val IMAGE_DIRECTORY = "MangaAppImageDirectory"
+    }
+
 }

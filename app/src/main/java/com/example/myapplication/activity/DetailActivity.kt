@@ -2,6 +2,7 @@ package com.example.myapplication.activity
 
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -41,8 +42,8 @@ class DetailActivity : AppCompatActivity(), NightModeSetUp {
         lifecycleScope.launch {
             comicsDao.fetchComicsById(comicsId).collect() {
                 if(it != null) {
-                    binding.ivCover.setImageResource(it.cover)
-                    binding.ivBackgroundCover.setImageResource(it.backgroundCover)
+                    binding.ivCover.setImageURI(Uri.parse(it.cover))
+                    binding.ivBackgroundCover.setImageURI(Uri.parse(it.backgroundCover))
                     binding.tvDetailsComicsTitle.text = it.title
                     binding.tvDetailsComicsTitleTranslated.text = it.title
                 }

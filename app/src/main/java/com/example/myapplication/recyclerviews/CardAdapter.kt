@@ -1,5 +1,6 @@
 package com.example.myapplication.recyclerviews
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -29,7 +30,7 @@ class CardAdapter(private val comicsList: ArrayList<Comics>, private val clickLi
         fun bindComics(comics: Comics) {
             cardCellBinding.tvComicsTitle.text = comics.title
             cardCellBinding.tvComicsType.text = comics.type
-            cardCellBinding.ivCover.setBackgroundResource(comics.cover)
+            cardCellBinding.ivCover.setImageURI(Uri.parse(comics.cover))
             cardCellBinding.cvComics.setOnClickListener { clickListener.onClick(comics) }
         }
 

@@ -9,7 +9,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/cv_comics"
         style="@style/MyCardViewStyle"
-        android:layout_width="wrap_content"
+        android:layout_width="160dp"
         android:layout_height="200dp"
         android:layout_margin="10dp"
         android:clickable="true">

@@ -10,7 +10,7 @@ import com.example.myapplication.model.Comics
 import com.example.myapplication.model.CommentaryEntity
 
 
-@Database(entities = [Comics::class, CommentaryEntity::class], version = 1)
+@Database(entities = [Comics::class, CommentaryEntity::class], version = 2)
 abstract class MangaDatabase : RoomDatabase() {
 
     abstract fun CommentaryDao(): CommentaryDao

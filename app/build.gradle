@@ -49,6 +49,10 @@ dependencies {
 
     implementation "androidx.activity:activity-ktx:$activity_version"
 
+    //Dexter for permissions
+    implementation 'com.karumi:dexter:6.2.3'
+
+
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
